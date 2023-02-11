@@ -1,0 +1,12 @@
+#!/command/execlineb -P
+with-contenv
+
+fdmove -c 2 1
+
+s6-envdir /etc/koha-envvars
+
+importas instancename INSTANCE_NAME
+
+s6-setuidgid ${instancename}-koha
+
+/usr/bin/perl /usr/share/koha/bin/background_jobs_worker.pl 

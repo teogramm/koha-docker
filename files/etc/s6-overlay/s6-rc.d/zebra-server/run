@@ -1,0 +1,10 @@
+#!/command/execlineb -P
+s6-envdir /etc/koha-envvars
+
+fdmove -c 2 1
+
+importas instancename INSTANCE_NAME
+
+s6-setuidgid ${instancename}-koha
+
+/usr/bin/zebrasrv -v 1 -f /etc/koha/sites/${instancename}/koha-conf.xml

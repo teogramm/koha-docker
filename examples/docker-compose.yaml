@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  koha:
+    image: teogramm/koha:22.11
+    ports:
+      - 8080:8080
+      - 8081:8081
+    networks:
+      - koha
+    cap_add:
+      - DAC_READ_SEARCH
+      - SYS_NICE
+    environment:
+      KOHA_INSTANCE: teolib
+      MYSQL_SERVER: db
+      MYSQL_PASSWORD: example
+      MEMCACHED_SERVERS: memcached:11211
+      MB_HOST: rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+      - memcached
+
+  rabbitmq:
+      image: rabbitmq
+      volumes:
+        - ./.rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
+      networks:
+        - koha
+
+  db:
+    image: mariadb
+    volumes:
+      - mariadb-koha:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: koha_teolib
+      MARIADB_USER: koha_teolib
+      MARIADB_PASSWORD: example
+    networks:
+      - koha
+
+  memcached:
+    image: memcached
+    networks:
+      - koha
+
+volumes:
+    mariadb-koha:
+
+networks:
+    koha:
