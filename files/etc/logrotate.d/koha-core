@@ -1,0 +1,14 @@
+/var/log/koha/*/*.log {
+    rotate 5
+    weekly
+    missingok
+    copytruncate
+    compress
+    delaycompress
+    notifempty
+    sharedscripts
+    postrotate
+        /command/s6-svc -h /run/service/apache2
+        /command/s6-svc -r /run/service/plack
+    endscript
+}

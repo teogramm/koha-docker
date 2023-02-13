@@ -28,6 +28,8 @@ The main configuration environment variables are documented in
 
 For a quick start check out the included [docker-compose](examples/docker-compose.yaml) file.
 
+Logs for stored under the `/var/log/koha` directory.
+
 ## Credits
 
 Some scripts have been taken from https://gitlab.com/koha-community/docker/koha-docker and modified.

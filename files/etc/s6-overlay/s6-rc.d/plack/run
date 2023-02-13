@@ -3,6 +3,4 @@ fdmove -c 2 1
 
 s6-envdir /etc/koha-envvars
 
-importas instancename INSTANCE_NAME
-
-/usr/bin/starman -M FindBin --socket /var/run/koha/${instancename}/plack.sock --max-requests 50 --workers 2 -E deployment --user=${instancename}-koha --group=${instancename}-koha --access-log /dev/stdout --error-log /dev/stdout "/etc/koha/plack.psgi" 
+/usr/bin/starman -M FindBin --socket /var/run/koha/default/plack.sock --max-requests 50 --workers 2 -E deployment --user=default-koha --group=default-koha --access-log /var/log/koha/default/plack.log --error-log /var/log/koha/default/plack-error.log "/etc/koha/plack.psgi" 

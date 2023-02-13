@@ -11,9 +11,10 @@ services:
       - DAC_READ_SEARCH
       - SYS_NICE
     environment:
-      KOHA_INSTANCE: teolib
       MYSQL_SERVER: db
+      MYSQL_USER: koha_teolib
       MYSQL_PASSWORD: example
+      DB_NAME: koha_teolib
       MEMCACHED_SERVERS: memcached:11211
       MB_HOST: rabbitmq
     depends_on:

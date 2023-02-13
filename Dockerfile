@@ -2,6 +2,7 @@ FROM debian:bullseye
 
 ENV DEBIAN_FRONTEND noninteractive
 ARG S6_OVERLAY_VERSION=3.1.3.0
+ARG S6_OVERLAY_ARCH="x86_64"
 ARG KOHA_VERSION=22.11
 
 LABEL org.opencontainers.image.source=https://github.com/teorgamm/koha-docker
@@ -18,7 +19,7 @@ RUN apt-get  update \
 
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
 
 RUN mkdir /etc/apt/keyrings/ && \
@@ -30,6 +31,7 @@ RUN apt-get update \
     && apt-get install -y koha-core \
        idzebra-2.0 \
        apache2 libapache2-mpm-itk\
+       logrotate \
     && rm -rf /var/cache/apt/archives/* \
     && rm -rf /var/lib/apt/lists/*
 
@@ -38,9 +40,12 @@ RUN a2enmod rewrite \
     && a2enmod proxy_http \
     && a2enmod cgi \
     && a2dissite 000-default \
-    && echo "Listen 8081\nListen 8080" > /etc/apache2/ports.conf
+    && echo "Listen 8081\nListen 8080" > /etc/apache2/ports.conf \
+    && sed -E -i "s#^(export APACHE_LOG_DIR=).*#\1/var/log/koha/apache#g" /etc/apache2/envvars \
+    && mkdir -p /var/log/koha/apache \
+    && chown -R www-data:www-data /var/log/koha/apache
 
-COPY files/ /
+COPY --chown 0:0 files/ /
 WORKDIR /docker
 
 EXPOSE 2100 6001 8080 8081

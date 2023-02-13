@@ -1,4 +1,0 @@
-#!/bin/sh
-if { mkdir -p /var/log/cron }
-if { chown nobody:nogroup /var/log/cron }
-chmod 02755 /var/log/cron

@@ -1,12 +1,13 @@
 #!/command/with-contenv bash
 
-#if no koha instance name was provided, then set it as "default"
-export KOHA_INSTANCE=${KOHA_INSTANCE:-default}
+export KOHA_INSTANCE=default
 
 export KOHA_INTRANET_PORT=8081
 export KOHA_OPAC_PORT=8080
 export MEMCACHED_SERVERS=${MEMCACHED_SERVERS:-memcached}
 export MYSQL_SERVER=${MYSQL_SERVER:-db}
+export DB_NAME=${DB_NAME:-koha_default}
+export MYSQL_USER=${DB_NAME:-koha_default}
 export MYSQL_PASSWORD=${MYSQL_PASSWORD:-$(pwgen -s 15 1)}
 export ZEBRA_MARC_FORMAT=${ZEBRA_MARC_FORMAT:-marc21}
 export KOHA_PLACK_NAME=${KOHA_PLACK_NAME:-koha}
@@ -21,7 +22,7 @@ export MB_PASS=${MB_PASS:-guest}
 envsubst < /docker/templates/koha-sites.conf > /etc/koha/koha-sites.conf
 
 # Create entry with admin username, password and myqsl server for this instance
-echo -n "${KOHA_INSTANCE}:koha_${KOHA_INSTANCE}:${MYSQL_PASSWORD}:koha_${KOHA_INSTANCE}:${MYSQL_SERVER}" > /etc/koha/passwd
+echo -n "default:${MYSQL_USER}:${MYSQL_PASSWORD}:${DB_NAME}:${MYSQL_SERVER}" > /etc/koha/passwd
 
 source /usr/share/koha/bin/koha-functions.sh
 
@@ -49,7 +50,6 @@ then
     # Start zebra services with s6
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/zebra-indexer
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/zebra-server
-    s6-rc-update
 else
     koha-elasticsearch --rebuild -p $(grep -c ^processor /proc/cpuinfo) ${KOHA_INSTANCE} &
 fi
@@ -81,7 +81,7 @@ then
         fi
     done
 fi
-    
+
 koha-plack --enable ${KOHA_INSTANCE}
 a2enmod proxy
 

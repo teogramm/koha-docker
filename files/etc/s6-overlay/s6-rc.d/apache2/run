@@ -1,3 +1,7 @@
 #!/command/execlineb -P
 fdmove -c 2 1
-apache2ctl -DFOREGROUND
+
+trap { SIGTERM { apache2ctl stop } 
+       SIGHUP  { apache2ctl graceful } }
+
+apache2ctl -D "FOREGROUND"
