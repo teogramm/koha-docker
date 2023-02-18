@@ -30,7 +30,7 @@ MB_PARAMS="--mb-host ${MB_HOST} --mb-port ${MB_PORT} --mb-user ${MB_USER} --mb-p
 
 # Configure the elasticsearch server
 ES_PARAMS=""
-if [[ "${ELASTICSEARCH_HOST}" != "" ]]
+if [[ "${USE_ELASTICSEARCH}" = "true" ]]
 then
     ES_PARAMS="--elasticsearch-server ${ELASTICSEARCH_HOST}"
 fi
@@ -45,12 +45,8 @@ else
 fi
 
 # Configure search daemon
-if [ "${USE_ELASTICSEARCH}" != "true" ]
+if [ "${USE_ELASTICSEARCH}" = "true" ]
 then
-    # Start zebra services with s6
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/zebra-indexer
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/zebra-server
-else
     koha-elasticsearch --rebuild -p $(grep -c ^processor /proc/cpuinfo) ${KOHA_INSTANCE} &
 fi
 

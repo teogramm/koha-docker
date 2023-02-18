@@ -1,4 +1,10 @@
 #!/command/execlineb -P
+with-contenv
+
+importas -D "" elastic USE_ELASTICSEARCH
+
+if -n { test "${elastic}" = "true" }
+
 fdmove -c 2 1
 
 s6-envdir /etc/koha-envvars
