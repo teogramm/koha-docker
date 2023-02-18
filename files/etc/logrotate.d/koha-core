@@ -10,5 +10,6 @@
     postrotate
         /command/s6-svc -h /run/service/apache2
         /command/s6-svc -r /run/service/plack
+        /command/s6-svc -r /run/service/zebra-indexer
     endscript
 }
