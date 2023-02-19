@@ -1,0 +1,33 @@
+name: push-on-release
+on: workflow_dispatch
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get Koha version and suite
+      id: koha-version
+      run: sed -rn "s/([[:lower:]]+)-([[:digit:]]+\.[[:digit:]]+)\+[[:digit:]]+/SUITE=\1\nVERSION=\2/p" >> GITHUB_OUTPUT
+      env:
+        GITHUB_REF_NAME_TEST: test-00.00+1
+
+    - uses: redhat-actions/buildah-build@v2
+      name: Build image with Buildah
+      id: build-image
+      with:
+        image: docker.io/teogramm/koha
+        tags: v${{ steps.koha-version.VERSION }} ${{ steps.koha-version.SUITE }}
+        containerfiles: |
+           ./Dockerfile
+        platforms: linux/amd64, linux/arm64, linux/armhf
+
+    - name: Push to Docker Hub
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: docker.io/teogramm
+        username: teogramm
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
