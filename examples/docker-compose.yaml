@@ -23,14 +23,14 @@ services:
       - memcached
 
   rabbitmq:
-      image: rabbitmq
+      image: docker.io/rabbitmq
       volumes:
         - ./.rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
       networks:
         - koha
 
   db:
-    image: mariadb
+    image: docker.io/mariadb:11
     volumes:
       - mariadb-koha:/var/lib/mysql
     environment:
@@ -42,7 +42,7 @@ services:
       - koha
 
   memcached:
-    image: memcached
+    image: docker.io/memcached
     networks:
       - koha
 
