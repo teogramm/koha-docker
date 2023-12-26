@@ -26,7 +26,7 @@ The image is available on [Docker Hub](https://hub.docker.com/r/teogramm/koha)
 The main configuration environment variables are documented in
 [config-main.env](config-main.env).
 
-For a quick start check out the included [docker-compose](examples/docker-compose.yaml) file.
+For a quick start check out the included [docker-compose](examples/docker-compose.yaml) file, and place [.rabbitmq_plugins](examples/.rabbitmq_plugins) in the same directory as the docker-compose file.
 
 Logs for stored under the `/var/log/koha` directory.
 
