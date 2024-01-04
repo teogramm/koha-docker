@@ -25,7 +25,7 @@ services:
   rabbitmq:
       image: docker.io/rabbitmq
       volumes:
-        - ./.rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
+        - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
       networks:
         - koha
 
