@@ -26,9 +26,12 @@ The image is available on [Docker Hub](https://hub.docker.com/r/teogramm/koha)
 The main configuration environment variables are documented in
 [config-main.env](config-main.env).
 
-For a quick start check out the included [docker-compose](examples/docker-compose.yaml) file.
-
 Logs for stored under the `/var/log/koha` directory.
+
+In order to function, Koha requires a MySQL database, a Memcached server and a RabbitMQ server with the stomp plugin.
+
+The provided [docker-compose file](examples/docker-compose.yaml) sets up all of these as containers. It provides an easy way to
+get a Koha insstance up and running. For a production environment it is recommened that each container is set up separately.
 
 ## Credits
 
