@@ -1,8 +1,8 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 ENV DEBIAN_FRONTEND noninteractive
-ARG S6_OVERLAY_VERSION=3.1.3.0
-ARG KOHA_VERSION=22.11
+ARG S6_OVERLAY_VERSION=3.2.0.2
+ARG KOHA_VERSION=24.11
 ARG TARGETARCH
 
 LABEL org.opencontainers.image.source=https://github.com/teorgamm/koha-docker
@@ -28,7 +28,7 @@ RUN echo ${TARGETARCH} && case ${TARGETARCH} in \
     && wget -P /tmp/ -q https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}.tar.xz \
     && tar -C / -Jxpf /tmp/s6-overlay-${S6_ARCH}.tar.xz
 
-RUN mkdir /etc/apt/keyrings/ && \
+RUN mkdir -p /etc/apt/keyrings/ && \
     wget -qO - https://debian.koha-community.org/koha/gpg.asc | gpg --dearmor -o /etc/apt/keyrings/koha.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/koha.gpg] https://debian.koha-community.org/koha ${KOHA_VERSION}  main bullseye" | tee /etc/apt/sources.list.d/koha.list
 

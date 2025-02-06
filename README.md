@@ -1,6 +1,6 @@
 # koha-docker
 
-![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/teogramm/koha/22.11)
+![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/teogramm/koha/latest)
 
 A Koha Docker container which includes:
 * The Apache webserver serving the OPAC (Port 8080) and
