@@ -23,7 +23,7 @@ services:
       - memcached
 
   rabbitmq:
-      image: docker.io/rabbitmq
+      image: docker.io/rabbitmq:3
       volumes:
         - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
       networks:
