@@ -1,0 +1,9 @@
+#!/command/execlineb -P
+
+fdmove -c 2 1
+
+s6-envdir /etc/koha-envvars
+
+s6-setuidgid default-koha
+
+/usr/bin/perl /usr/share/koha/bin/workers/background_jobs_worker.pl --queue long_tasks
