@@ -26,6 +26,8 @@ The image is available on [Docker Hub](https://hub.docker.com/r/teogramm/koha)
 The main configuration environment variables are documented in
 [config-main.env](config-main.env).
 
+The username and password for the initial setup are the same as the database username and password.
+
 Logs for stored under the `/var/log/koha` directory.
 
 In order to function, Koha requires a MySQL database, a Memcached server and a RabbitMQ server with the stomp plugin.
