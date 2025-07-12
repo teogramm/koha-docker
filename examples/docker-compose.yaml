@@ -49,6 +49,25 @@ services:
     image: docker.io/memcached
     networks:
       - koha
+      
+  elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+  environment:
+    - discovery.type=single-node
+    - network.host=0.0.0.0
+    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    - xpack.security.enabled=false
+  ulimits:
+    memlock:
+      soft: -1; hard: -1
+    nofile:
+      soft: 65536; hard: 65536
+  volumes:
+    - esdata:/usr/share/elasticsearch/data
+
+volumes:
+  esdata:
+ 
 
 volumes:
     mariadb-koha:
