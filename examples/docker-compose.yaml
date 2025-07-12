@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   koha:
     image: teogramm/koha:24.11
@@ -27,7 +28,7 @@ services:
       memcached:
         condition: service_started
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
 
   rabbitmq:
     image: docker.io/rabbitmq:3
@@ -40,7 +41,7 @@ services:
       interval: 10s
       retries: 5
 
-    db:
+  db:
     image: docker.io/mariadb:11
     volumes:
       - mariadb-koha:/var/lib/mysql
@@ -51,12 +52,11 @@ services:
       MARIADB_PASSWORD: example
     networks:
       - koha
-     healthcheck:
+    healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 3
-      
 
   memcached:
     image: docker.io/memcached
