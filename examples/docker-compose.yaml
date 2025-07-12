@@ -51,10 +51,12 @@ services:
       MARIADB_PASSWORD: example
     networks:
       - koha
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+     healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
-      retries: 5
+      timeout: 5s
+      retries: 3
+      
 
   memcached:
     image: docker.io/memcached
