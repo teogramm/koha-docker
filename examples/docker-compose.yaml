@@ -3,8 +3,8 @@ services:
   koha:
     image: teogramm/koha:24.11
     ports:
-      - 8080:8080
-      - 8081:8081
+      - "8080:8080"
+      - "8081:8081"
     networks:
       - koha
     cap_add:
@@ -17,17 +17,28 @@ services:
       DB_NAME: koha_teolib
       MEMCACHED_SERVERS: memcached:11211
       MB_HOST: rabbitmq
+      ELASTICSEARCH_ENABLED: "true"
+      ELASTICSEARCH_SERVER: elasticsearch:9200
     depends_on:
-      - db
-      - rabbitmq
-      - memcached
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      memcached:
+        condition: service_started
+      elasticsearch:
+        condition: service_started
 
   rabbitmq:
-      image: docker.io/rabbitmq:3
-      volumes:
-        - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
-      networks:
-        - koha
+    image: docker.io/rabbitmq:3
+    volumes:
+      - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
+    networks:
+      - koha
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
 
   db:
     image: docker.io/mariadb:11
@@ -39,9 +50,9 @@ services:
       MARIADB_USER: koha_teolib
       MARIADB_PASSWORD: example
     networks:
-      - koha   
+      - koha
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping","-h","localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       retries: 5
 
@@ -49,28 +60,34 @@ services:
     image: docker.io/memcached
     networks:
       - koha
-      
+
   elasticsearch:
-  image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
-  environment:
-    - discovery.type=single-node
-    - network.host=0.0.0.0
-    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    - xpack.security.enabled=false
-  ulimits:
-    memlock:
-      soft: -1; hard: -1
-    nofile:
-      soft: 65536; hard: 65536
-  volumes:
-    - esdata:/usr/share/elasticsearch/data
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    environment:
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - koha
+    healthcheck:
+      test: ["CMD", "curl", "-fsSL", "http://localhost:9200"]
+      interval: 10s
+      retries: 5
 
 volumes:
+  mariadb-koha:
   esdata:
- 
-
-volumes:
-    mariadb-koha:
 
 networks:
-    koha:
+  koha:
+
