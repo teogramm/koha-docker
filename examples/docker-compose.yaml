@@ -39,7 +39,11 @@ services:
       MARIADB_USER: koha_teolib
       MARIADB_PASSWORD: example
     networks:
-      - koha
+      - koha   
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping","-h","localhost"]
+      interval: 10s
+      retries: 5
 
   memcached:
     image: docker.io/memcached
