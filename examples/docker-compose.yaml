@@ -40,7 +40,7 @@ services:
       interval: 10s
       retries: 5
 
-  db:
+    db:
     image: docker.io/mariadb:11
     volumes:
       - mariadb-koha:/var/lib/mysql
