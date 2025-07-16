@@ -15,6 +15,7 @@ services:
     cap_add:
       - DAC_READ_SEARCH
       - SYS_NICE
+    # Elimina bloques environment para evitar conflictos con env_file
     depends_on:
       db:
         condition: service_healthy
