@@ -3,23 +3,18 @@ version: "3.9"
 services:
   koha:
     image: teogramm/koha:24.11
+    # Cargar variables de entorno desde archivos en la raíz del proyecto
+    env_file:
+      - ../config-main.env
+      - ../config-sip.env
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "8080:8080"    # OPAC
+      - "8081:8081"    # Intranet
     networks:
       - koha
     cap_add:
       - DAC_READ_SEARCH
       - SYS_NICE
-    environment:
-      MYSQL_SERVER: db
-      MYSQL_USER: koha_teolib
-      MYSQL_PASSWORD: example
-      DB_NAME: koha_teolib
-      MEMCACHED_SERVERS: memcached:11211
-      MB_HOST: rabbitmq
-      ELASTICSEARCH_ENABLED: "true"
-      ELASTICSEARCH_SERVER: elasticsearch:9200
     depends_on:
       db:
         condition: service_healthy
