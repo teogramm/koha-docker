@@ -38,7 +38,7 @@ services:
       - koha
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    image: koha/elasticsearch-icu:6.x
     container_name: examples-elasticsearch
     environment:
       - discovery.type=single-node
@@ -67,8 +67,8 @@ services:
     env_file:
       - ../config-main.env
     ports:
-      - "8080:8080"    # OPAC
-      - "8081:8081"    # Staff
+      - "8080:8080"  # OPAC
+      - "8081:8081"  # Staff
     cap_add:
       - DAC_READ_SEARCH
       - SYS_NICE
