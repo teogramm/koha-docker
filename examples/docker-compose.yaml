@@ -1,53 +1,94 @@
 version: "3.9"
+
 services:
-  koha:
-    image: teogramm/koha:24.11
-    ports:
-      - 8080:8080
-      - 8081:8081
-    networks:
-      - koha
-    cap_add:
-      - DAC_READ_SEARCH
-      - SYS_NICE
-    environment:
-      MYSQL_SERVER: db
-      MYSQL_USER: koha_teolib
-      MYSQL_PASSWORD: example
-      DB_NAME: koha_teolib
-      MEMCACHED_SERVERS: memcached:11211
-      MB_HOST: rabbitmq
-    depends_on:
-      - db
-      - rabbitmq
-      - memcached
-
-  rabbitmq:
-      image: docker.io/rabbitmq:3
-      volumes:
-        - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
-      networks:
-        - koha
-
   db:
     image: docker.io/mariadb:11
-    volumes:
-      - mariadb-koha:/var/lib/mysql
+    container_name: examples-db
     environment:
       MARIADB_ROOT_PASSWORD: example
       MARIADB_DATABASE: koha_teolib
       MARIADB_USER: koha_teolib
       MARIADB_PASSWORD: example
+    volumes:
+      - mariadb-koha:/var/lib/mysql
     networks:
       - koha
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    image: docker.io/rabbitmq:3
+    container_name: examples-rabbitmq
+    volumes:
+      - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
+    networks:
+      - koha
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
 
   memcached:
     image: docker.io/memcached
+    container_name: examples-memcached
+    networks:
+      - koha
+
+  elasticsearch:
+    image: koha/elasticsearch-icu:6.x
+    container_name: examples-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - koha
+    healthcheck:
+      test: ["CMD", "curl", "-fsSL", "http://localhost:9200"]
+      interval: 10s
+      retries: 5
+
+  koha:
+    image: teogramm/koha:24.11
+    container_name: examples-koha
+    env_file:
+      - ../config-main.env
+    ports:
+      - "8080:8080"  # OPAC
+      - "8081:8081"  # Staff
+    cap_add:
+      - DAC_READ_SEARCH
+      - SYS_NICE
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      memcached:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - koha
 
 volumes:
-    mariadb-koha:
+  mariadb-koha:
+  esdata:
 
 networks:
-    koha:
+  koha:
+    driver: bridge
+
