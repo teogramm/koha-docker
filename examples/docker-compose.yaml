@@ -1,33 +1,27 @@
 version: "3.9"
 
 services:
-  koha:
-    image: teogramm/koha:24.11
-    # Cargar variables de entorno desde archivos en la raíz del proyecto
-    env_file:
-      - ../config-main.env
-      - ../config-sip.env
-    ports:
-      - "8080:8080"    # OPAC
-      - "8081:8081"    # Intranet
+  db:
+    image: docker.io/mariadb:11
+    container_name: examples-db
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: koha_teolib
+      MARIADB_USER: koha_teolib
+      MARIADB_PASSWORD: example
+    volumes:
+      - mariadb-koha:/var/lib/mysql
     networks:
       - koha
-    cap_add:
-      - DAC_READ_SEARCH
-      - SYS_NICE
-    # Elimina bloques environment para evitar conflictos con env_file
-    depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      memcached:
-        condition: service_started
-      elasticsearch:
-        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   rabbitmq:
     image: docker.io/rabbitmq:3
+    container_name: examples-rabbitmq
     volumes:
       - ./rabbitmq_plugins:/etc/rabbitmq/enabled_plugins
     networks:
@@ -37,30 +31,15 @@ services:
       interval: 10s
       retries: 5
 
-  db:
-    image: docker.io/mariadb:11
-    volumes:
-      - mariadb-koha:/var/lib/mysql
-    environment:
-      MARIADB_ROOT_PASSWORD: example
-      MARIADB_DATABASE: koha_teolib
-      MARIADB_USER: koha_teolib
-      MARIADB_PASSWORD: example
-    networks:
-      - koha
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
   memcached:
     image: docker.io/memcached
+    container_name: examples-memcached
     networks:
       - koha
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: examples-elasticsearch
     environment:
       - discovery.type=single-node
       - network.host=0.0.0.0
@@ -82,10 +61,34 @@ services:
       interval: 10s
       retries: 5
 
+  koha:
+    image: teogramm/koha:24.11
+    container_name: examples-koha
+    env_file:
+      - ../config-main.env
+    ports:
+      - "8080:8080"    # OPAC
+      - "8081:8081"    # Staff
+    cap_add:
+      - DAC_READ_SEARCH
+      - SYS_NICE
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      memcached:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - koha
+
 volumes:
   mariadb-koha:
   esdata:
 
 networks:
   koha:
+    driver: bridge
 
