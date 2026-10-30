@@ -1,0 +1,86 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-6.1.2
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    bind-mount-options: ./rabbitmq_plugins:Z
+    io.kubernetes.cri-o.SandboxID/koha-app: 9f71388621682454eac20b45f1c8cea39dc4a29ea20dab402a340a7c25afc46c
+    io.kubernetes.cri-o.SandboxID/koha-db: 9f71388621682454eac20b45f1c8cea39dc4a29ea20dab402a340a7c25afc46c
+    io.kubernetes.cri-o.SandboxID/koha-memcached: 9f71388621682454eac20b45f1c8cea39dc4a29ea20dab402a340a7c25afc46c
+    io.kubernetes.cri-o.SandboxID/koha-rabbitmq: 9f71388621682454eac20b45f1c8cea39dc4a29ea20dab402a340a7c25afc46c
+  creationTimestamp: "2026-10-29T21:42:21Z"
+  labels:
+    app: koha
+  name: koha
+spec:
+  containers:
+  - args:
+    - mariadbd
+    env:
+    - name: MARIADB_DATABASE
+      value: koha_teolib
+    - name: MARIADB_USER
+      value: %MARIADB_USER%
+    - name: MARIADB_PASSWORD
+      value: %MARIADB_PASSWORD%
+    - name: MARIADB_ROOT_PASSWORD
+      value: %MARIADB_ROOT_PASSWORD%
+    image: docker.io/library/mariadb:11
+    name: koha-db
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+    - containerPort: 8081
+      hostPort: 8081
+    volumeMounts:
+    - mountPath: /var/lib/mysql
+      name: mariadb-koha-pvc
+  - args:
+    - memcached
+    image: docker.io/library/memcached:latest
+    name: koha-memcached
+    securityContext: {}
+  - args:
+    - rabbitmq-server
+    image: docker.io/library/rabbitmq:3
+    name: koha-rabbitmq
+    volumeMounts:
+    - mountPath: /etc/rabbitmq/enabled_plugins
+      name: koha-docker-examples-rabbitmq-plugins-host-0
+    - mountPath: /var/lib/rabbitmq
+      name: 1c31ac0b1789f16c6dad8578fb9763cbb983f7e6b22270320517912809b27c89-pvc
+  - env:
+    - name: MYSQL_USER
+      value: %MARIADB_USER%
+    - name: MYSQL_PASSWORD
+      value: %MARIADB_PASSWORD%
+    - name: DB_NAME
+      value: koha_teolib
+    - name: MB_HOST
+      value: localhost
+    - name: MYSQL_SERVER
+      value: 127.0.0.1:3006
+    - name: MEMCACHED_SERVERS
+      value: localhost:11211
+    image: localhost/koha-docker:latest
+    name: koha-app
+    securityContext:
+      capabilities:
+        add:
+        - CAP_DAC_READ_SEARCH
+        - CAP_SYS_NICE
+  volumes:
+  - name: mariadb-koha-pvc
+    persistentVolumeClaim:
+      claimName: mariadb-koha
+  - hostPath:
+      path: ./rabbitmq_plugins
+      type: File
+    name: koha-docker-examples-rabbitmq-plugins-host-0
+  - name: 1c31ac0b1789f16c6dad8578fb9763cbb983f7e6b22270320517912809b27c89-pvc
+    persistentVolumeClaim:
+      claimName: rabbitmq-koha
+
