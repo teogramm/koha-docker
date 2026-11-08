@@ -40,7 +40,8 @@ then
     ES_PARAMS="--elasticsearch-server ${ELASTICSEARCH_HOST}"
 fi
 
-if ! is_instance ${KOHA_INSTANCE} || [ ! -f "/etc/koha/sites/${KOHA_INSTANCE}/koha_conf.xml" ]
+
+if ! is_instance ${KOHA_INSTANCE} || [ ! -f "/etc/koha/sites/${KOHA_INSTANCE}/koha-conf.xml" ]
 then
     echo "Executing koha-create for instance ${KOHA_INSTANCE}"
     koha-create ${ES_PARAMS} ${MB_PARAMS} --use-db ${KOHA_INSTANCE} | true
@@ -52,7 +53,7 @@ fi
 # Configure search daemon
 if [ "${USE_ELASTICSEARCH}" = "true" ]
 then
-    koha-elasticsearch --rebuild -p $(grep -c ^processor /proc/cpuinfo) ${KOHA_INSTANCE} &
+    koha-elasticsearch --rebuild -p "$(grep -c ^processor /proc/cpuinfo)" ${KOHA_INSTANCE} &
 fi
 
 for i in $(koha-translate -l)
